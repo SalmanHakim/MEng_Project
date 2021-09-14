@@ -1,0 +1,2 @@
+14/09/2021, 14:05
+Installed Armadillo library to handle matrix multiplication using C++. Further documentation can be found at http://arma.sourceforge.net/docs.html. To compile, use "g++ example.cpp -o example -std=c++11 -O2 -larmadillo". The example code was just a simple matrix multiplication. The plan for next time is to try solve a random Ax=b linear equation.
