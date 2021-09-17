@@ -2,4 +2,7 @@
 Installed Armadillo library to handle matrix multiplication using C++. Further documentation can be found at http://arma.sourceforge.net/docs.html. To compile, use "g++ example.cpp -o example -std=c++11 -O2 -larmadillo". The example code was just a simple matrix multiplication. The plan for next time is to try solve a random Ax=b linear equation.
 
 15/09/2021, 22:00
-Tried redoing the example given in the documentation for sparse matrix solve. Then, I tried including circuit_1 benchmark matrix from SuiteSparse Collection. In order to implement that, I have to read the .mtx file into variables inside the code. The sparse matrix, A has been successfully read with no error. The plan for next time is to try a read vector, b into the variable.
+Tried redoing the example given in the documentation for sparse matrix solve. Then, I tried including circuit_1 benchmark matrix from SuiteSparse Collection. In order to implement that, I have to read the .mtx file into variables inside the code. The sparse matrix A has been successfully read with no error. The plan for next time is to try read vector b into the variable.
+
+16/09/2021, 23:25
+Vector b has been successfully read with no error. Vector x also has been solved and checked with the file given. It is roughly the same except for the accuracy. I tried implementing the sparse solver as a function to do the analysis on the timing. Apparently the profiling tool hasn't detected any bottlenecks on the timing. The profiling tool used is gprof. The plan for next time is to try the code with other benchmark matrices.

@@ -4,8 +4,27 @@
 using namespace std;
 using namespace arma;
 
+//Function to solve the linear equation
+void solve(sp_mat A, vec b) {
+    vec x = spsolve(A, b);
+
+    bool status = spsolve(x, A, b);
+    if (status == false) {
+        cout << "no solution" << endl;
+    }
+
+    cout << "x = " << x << endl;
+}
+
 int main(int argc, char **argv)
 {
+    //Check the number of parameters
+    if (argc < 3) {
+        //Show the correct syntax to user
+        cerr << "The correct syntax: " << argv[0] << " MatrixA VectorB" << endl;
+        return 1;
+    }
+
     //Open file
     ifstream finA(argv[1]);      //file name should be written in the command line
 
@@ -44,9 +63,19 @@ int main(int argc, char **argv)
     finb >> num_row >> num_col;
 
     //create vector
+    vec b(num_row);
 
+    //Read data
+    for (int j=0; j<num_row; j++) {
+        double data;
+        finb >> data;
+        b(j) = data;
+    }
 
     finA.close();
+    finb.close();
+
+    solve(A, b);
 
 //    sp_mat A = sprandu<sp_mat>(100, 100, 0.1);
 
