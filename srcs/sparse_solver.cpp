@@ -6,7 +6,12 @@ using namespace arma;
 
 //Function to solve the linear equation
 void solve(sp_mat A, vec b) {
-    vec x = spsolve(A, b);
+    superlu_opts opts;
+
+    opts.allow_ugly     = true;
+    opts.equilibrate    = true;
+
+    vec x = spsolve(A, b, "superlu", opts);
 
     bool status = spsolve(x, A, b);
     if (status == false) {
