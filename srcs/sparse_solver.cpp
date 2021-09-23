@@ -1,7 +1,6 @@
 #include <iostream>
 #include <armadillo>
 
-using namespace std;
 using namespace arma;
 
 //Function to solve the linear equation
@@ -15,10 +14,10 @@ void solve(sp_mat A, vec b) {
 
     bool status = spsolve(x, A, b);
     if (status == false) {
-        cout << "no solution" << endl;
+        std::cout << "no solution" << std::endl;
     }
 
-    cout << "x = " << x << endl;
+    std::cout << "x = " << x << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -26,12 +25,12 @@ int main(int argc, char **argv)
     //Check the number of parameters
     if (argc < 3) {
         //Show the correct syntax to user
-        cerr << "The correct syntax: " << argv[0] << " MatrixA VectorB" << endl;
+        std::cerr << "The correct syntax: " << argv[0] << " MatrixA VectorB" << std::endl;
         return 1;
     }
 
     //Open file
-    ifstream finA(argv[1]);      //file name should be written in the command line
+    std::ifstream finA(argv[1]);      //file name should be written in the command line
 
     //Declare variable for matrix features
     int num_row, num_col, num_lines;
@@ -57,7 +56,7 @@ int main(int argc, char **argv)
     }
 
     //Open file
-    ifstream finb(argv[2]);      //file name should be written in the command line
+    std::ifstream finb(argv[2]);      //file name should be written in the command line
 
     //Ignore header
     while (finb.peek() == '%') {

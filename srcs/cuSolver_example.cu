@@ -6,14 +6,12 @@
 #include <cuda_runtime.h>
 #include <cusolverDn.h>
 
-using namespace std;
-
 void printMatrix(int m, int n, const double *A, int lda, const char *name)
 {
     for (int row=0; row<m; row++) {
         for (int col=0; col<n; col++) {
             double Areg = A[row + (col*lda)];
-            cout << name << "(" << row+1 << "," << col+1 << ") = " << Areg << endl;
+            std::cout << name << "(" << row+1 << "," << col+1 << ") = " << Areg << std::endl;
         }
     }
 }
@@ -50,23 +48,23 @@ int main(int argc, char **argv)
 
     const int pivot_on = false;
 
-    cout << "example of getrf" << endl;
+    std::cout << "example of getrf" << std::endl;
 
     if (pivot_on) {
-        cout << "pivot in on : compute P*A = L*U" << endl;
+        std::cout << "pivot in on : compute P*A = L*U" << std::endl;
     }
 
     else {
-        cout <<  "pivot is off : compute A = L*U" << endl;
+        std::cout <<  "pivot is off : compute A = L*U" << std::endl;
     }
 
-    cout << "A = (matlab base-1)" << endl;
+    std::cout << "A = (matlab base-1)" << std::endl;
     printMatrix(m, m, A, lda, "A");
-    cout << "======================================================" << endl;
+    std::cout << "======================================================" << std::endl;
 
-    cout << "B = (matlab base-1)" << endl;
+    std::cout << "B = (matlab base-1)" << std::endl;
     printMatrix(m, 1, B, ldb, "B");
-    cout << "======================================================" << endl;
+    std::cout << "======================================================" << std::endl;
 
     //step 1 : create cuSolver handle, bind a stream
     status = cusolverDnCreate(&cusolverH);
@@ -122,18 +120,18 @@ int main(int argc, char **argv)
     assert(cudaSuccess == cudaStat3);
 
     if (0 > info) {
-        cout << -info << "-th parameter is wrong" << endl;
+        std::cout << -info << "-th parameter is wrong" << std::endl;
         exit(1);
     }
     if (pivot_on) {
-        cout << "pivoting sequence, matlab base-1" << endl;
+        std::cout << "pivoting sequence, matlab base-1" << std::endl;
         for (int j=0; j<m; j++) {
-            cout << "Ipiv(" << j+1 << ") = " << Ipiv[j] << endl;
+            std::cout << "Ipiv(" << j+1 << ") = " << Ipiv[j] << std::endl;
         }
     }
-    cout << "L and U = (matlab base-1)" << endl;
+    std::cout << "L and U = (matlab base-1)" << std::endl;
     printMatrix(m, m, LU, lda, "LU");
-    cout << "======================================================" << endl;
+    std::cout << "======================================================" << std::endl;
 
     //step 5 : solve A*X=B
     if (pivot_on) {
@@ -168,9 +166,9 @@ int main(int argc, char **argv)
     cudaStat1 = cudaMemcpy(X, d_B, sizeof(double)*m, cudaMemcpyDeviceToHost);
     assert(cudaSuccess == cudaStat1);
 
-    cout << "X = (matlab base-1)" << endl;
+    std::cout << "X = (matlab base-1)" << std::endl;
     printMatrix(m, 1, X, ldb, "X");
-    cout << "======================================================" << endl;
+    std::cout << "======================================================" << std::endl;
 
     //free resources
     if (d_A     ) cudaFree(d_A);
