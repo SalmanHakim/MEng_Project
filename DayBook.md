@@ -1,6 +1,7 @@
 ## 14/09/2021, 14:05
 Installed Armadillo library to handle matrix multiplication using C++. Further documentation can be found at [http://arma.sourceforge.net/docs.html]. To compile, use 
 > $g++ example.cpp -o example -std=c++11 -O2 -larmadillo 
+
 in the terminal. The example code was just a simple matrix multiplication. The plan for next time is to try solve a random Ax=b linear equation.
 
 ## 15/09/2021, 22:00
@@ -11,7 +12,8 @@ Vector b has been successfully read with no error. Vector x also has been solved
 
 ## 20/09/2021, 14:10
 I can't seem to get the profiling tool the work well with my codes. When implementing the code with circuit_4 benchmark matrices, the program run significantly slower. I then proceed with using the syntax 
-> $time ./<name of program> 
+> $time ./\<name of program\> 
+
 in the terminal. It shows real time which is the clock time, and the user time which is the CPU time. These information is enough for now. When running circuit_4, there are some inaccuracy present in the computed answer of x, compared to the reference vector of x given. Minor changes have been applied to the code to improve the accuracy. Currently doing some reading on the documentation of cuBLAS, cuSOLVER, cuSPARSE and cuSPARSELt before developing a code for GPU. The cuSOLVER documentation shows a sample code that uses LU factorisation. Copied the code and adjust the original C code to C++. The plan for next time is to run the code with benchmark matrices and observe execution time improvements.
 
 ## 22/09/2021, 13:30
