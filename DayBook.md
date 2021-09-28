@@ -30,3 +30,6 @@ will do just that. But, it requires the input matrix to be sorted in row order. 
 >cusparseXcoosortByRow()
 
 will make that happen. I have to check whether all the functions stated requires the parameters to be in host or device memory.
+
+## 28/09/2021
+I finished the code from the sorting and conversion part, to the solving part. The code seems fine as there are no errors present in it. Upon compiling, a warning message appear that stated the function cusparseDgthr() is deprecated. I have to use cusparseGather() instead. Unfortunately, it is not as straightforward as it may seems. The plan for next time is to solve this issue and compile the code to see if it works as it should.
