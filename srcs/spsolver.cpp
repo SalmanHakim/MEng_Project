@@ -21,7 +21,15 @@ void printMatrix(int m, int n, const double *x, int ldx, const char *name)
 
 int main(int argc, char** argv)
 {
-    std::ifstream finA("circuit_1/circuit_1.mtx");
+    //Check the number of parameters
+    if (argc < 3) {
+        //Show the correct syntax to user
+        std::cerr << "The correct syntax: " << argv[0] << " MatrixA VectorB" << std::endl;
+        return 1;
+    }
+
+    //Open file
+    std::ifstream finA(argv[1]);      //file name should be written in the command line
 
     //Declare variable for matrix features
     int num_row, num_col, nnzA;
@@ -39,6 +47,8 @@ int main(int argc, char** argv)
     int cooRowIndA[nnzA];
     int cooColIndA[nnzA];
 
+    int csrRowPtrA[num_row+1];
+
     //Read the data
     for (int i=0; i<nnzA; i++) {
         int a, b;
@@ -49,7 +59,8 @@ int main(int argc, char** argv)
         cooColIndA[i] = b-1;
     }
 
-    std::ifstream finb("circuit_1/circuit_1_b.mtx");
+    //Open file
+    std::ifstream finb(argv[2]);      //file name should be written in the command line
 
     //Ignore header
     while (finb.peek() == '%') {
@@ -74,6 +85,19 @@ int main(int argc, char** argv)
 
     finA.close();
     finb.close();
+
+    /*int num_row = 3;
+    int num_col = 3;
+    int nnzA    = 4;
+
+    int cooRowIndA[nnzA]    = {1,2,0,0};
+    int cooColIndA[nnzA]    = {2,1,0,1};
+    int csrRowPtrA[num_row+1];
+
+    double cooValA[nnzA]    = {8.0,5.0,1.0,2.0};
+    double Vecb[num_row]    = {3.0,5.0,1.0};
+    //double *Vecx = (double *)malloc(sizeof(double)*num_row);       //{2.6, 0.2, 0.625}
+    double Vecx[num_row];*/
     
     //////////////////////////////////////////////////////////////////////////////////////////
     
@@ -105,12 +129,18 @@ int main(int argc, char** argv)
     size_t pBufferSizeInBytes   = 0;
     void *pBuffer               = NULL;
 
-    //step 1 : create cuSolver and cuSparse handle
+    //step 1 : create cuSolver and cuSparse handle, stream
     cusolver_status = cusolverSpCreate(&cusolverH);
     assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
 
     cusparse_status = cusparseCreate(&cusparseH);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
+
+    cusparse_status = cusparseSetStream(cusparseH, stream);
+    assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
+
+    cusolver_status = cusolverSpSetStream(cusolverH, stream);
+    assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
 
     //step 2 : sort A in row order
     ////allocate buffer
@@ -193,36 +223,77 @@ int main(int argc, char** argv)
                                     CUSPARSE_INDEX_BASE_ZERO);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
 
-    //step 4 : LU factorisation and solving for x
+    //step 4 : copy parameters from device to host
     cusparseMatDescr_t MatADescr;
     cusparse_status = cusparseCreateMatDescr(&MatADescr);
-    cudaStat1 = cudaMalloc(&d_Vecx, sizeof(double)*num_row);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
-    assert(cudaSuccess == cudaStat1);
+    cusparse_status = cusparseSetMatDiagType(MatADescr, CUSPARSE_DIAG_TYPE_NON_UNIT);
+    assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
+    
+    //cudaStat1 = cudaMalloc(&d_Vecx, sizeof(double)*num_row);
+    //assert(cudaSuccess == cudaStat1);
 
+    cudaStat1 = cudaDeviceSynchronize(); /* wait until the computation is done */
+    //cudaStat2 = cudaMemcpy(Vecx, d_Vecx, sizeof(double)*num_row, cudaMemcpyDeviceToHost);
+    cudaStat3 = cudaMemcpy(cooRowIndA, d_cooRowIndA, sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
+    cudaStat4 = cudaMemcpy(cooColIndA, d_cooColIndA, sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
+    cudaStat5 = cudaMemcpy(csrRowPtrA, d_csrRowPtrA, sizeof(int)*(num_row+1)   , cudaMemcpyDeviceToHost);
+    cudaStat6 = cudaMemcpy(P,       d_P      , sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
+    cudaStat7 = cudaMemcpy(cooValA, d_cooValA_sorted, sizeof(double)*nnzA, cudaMemcpyDeviceToHost);
+    cudaStat8 = cudaDeviceSynchronize();
+    assert( cudaSuccess == cudaStat1 );
+    assert( cudaSuccess == cudaStat2 );
+    assert( cudaSuccess == cudaStat3 );
+    assert( cudaSuccess == cudaStat4 );
+    assert( cudaSuccess == cudaStat5 );
+    assert( cudaSuccess == cudaStat6 );
+    assert( cudaSuccess == cudaStat7 );
+    assert( cudaSuccess == cudaStat8 );
+
+    //step 5 : LU factorisation and solving for x
     double tol  = 1.e-7;
-    int *sing   = NULL;
+    int sing   = 0;
 
     cusolver_status = cusolverSpDcsrlsvluHost(
                                         cusolverH,
                                         num_row,
                                         nnzA,
                                         MatADescr,
-                                        d_cooValA_sorted,
-                                        d_csrRowPtrA,
-                                        d_cooColIndA,
-                                        d_Vecb,
+                                        cooValA,
+                                        csrRowPtrA,
+                                        cooColIndA,
+                                        Vecb,
                                         tol,
                                         0,
-                                        d_Vecx,
-                                        sing);
+                                        Vecx,
+                                        &sing);
     cudaStat1 = cudaDeviceSynchronize();
     assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
     assert(cudaSuccess == cudaStat1);
 
-    //step 4 : copy vector x from device to host
-    cudaStat1 = cudaMemcpy(Vecx, d_Vecx, sizeof(double)*num_row, cudaMemcpyDeviceToHost);
-    assert(cudaSuccess == cudaStat1);
+
+    /*printf("sorted csr: \n");
+    printf("Row = {");
+    for(int j = 0 ; j < num_row+1; j++){
+        printf("%d, ", csrRowPtrA[j]);
+    };
+    printf("}\n");
+
+    printf("Col = {");
+    for(int j = 0 ; j < nnzA; j++){
+        printf("%d, ", cooColIndA[j]);
+    };
+    printf("}\n");
+
+    printf("Val = {");
+    for(int j = 0 ; j < nnzA; j++){
+        printf("%f, ", cooValA[j]);
+    };
+    printf("}\n");
+
+    for(int j = 0 ; j < nnzA; j++){
+        printf("P[%d] = %d \n", j, P[j] );
+    };*/
 
     std::cout << "X = (matlab base-1)" << std::endl;
     printMatrix(num_row, 1, Vecx, num_row, "x");
@@ -241,8 +312,11 @@ int main(int argc, char** argv)
     if (cusolverH)          cusolverSpDestroy(cusolverH);
     if (cusparseH)          cusparseDestroy(cusparseH);
     if (stream)             cudaStreamDestroy(stream);
+    if (MatADescr)          cusparseDestroyMatDescr(MatADescr);
 
     cudaDeviceReset();
+
+    //free(Vecx);
 
     return 0;
 }

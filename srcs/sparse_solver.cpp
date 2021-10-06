@@ -1,16 +1,18 @@
 #include <iostream>
 #include <armadillo>
+#include <time.h>
 
 using namespace arma;
 
 //Function to solve the linear equation
 void solve(sp_mat A, vec b) {
+
     superlu_opts opts;
 
-    opts.allow_ugly     = true;
-    opts.equilibrate    = true;
+    //opts.allow_ugly     = true;
+    //opts.equilibrate    = true;
 
-    vec x = spsolve(A, b, "superlu", opts);
+    vec x = spsolve(A, b, "superlu");
 
     bool status = spsolve(x, A, b);
     if (status == false) {

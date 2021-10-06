@@ -32,4 +32,31 @@ will do just that. But, it requires the input matrix to be sorted in row order. 
 will make that happen. I have to check whether all the functions stated requires the parameters to be in host or device memory.
 
 ## 28/09/2021
-I finished the code from the sorting and conversion part, to the solving part. The code seems fine as there are no errors present in it. Upon compiling, a warning message appear that stated the function cusparseDgthr() is deprecated. I have to use cusparseGather() instead. Unfortunately, it is not as straightforward as it may seems. The plan for next time is to solve this issue and compile the code to see if it works as it should.
+I finished the code from the sorting and conversion part, to the solving part. The code seems fine as there are no errors present in it. Upon compiling, a warning message appear that stated the function 
+>cusparseDgthr() 
+
+is deprecated. I have to use 
+>cusparseGather() 
+
+instead. Unfortunately, it is not as straightforward as it may seems. The plan for next time is to solve this issue and compile the code to see if it works as it should.
+
+## 03/10/2021
+The `cusparseGather()` is a fairly new function and there is not many guides as to how to use them. And it turns out that the code can still be compiled despite the warning message from using `cusparseDgthr()`. First try at running the executable file, an error came out.
+>Segmentation fault (core dumped)
+
+My suspicion is it has something to do with the function `cusolverSpDcsrlsvluHost()`. My approach in solving the linear equation consist of  a few major steps; sorting matrix A in row order, converting the sorted matrix A to CSR storage format, and finally the LU factorisation. I plan to use a simple 3x3 matrix as A, and 3x1 matrix as b.
+```
+    | 1 2 0 |               | 3 |
+A = | 0 0 8 |           b = | 5 |
+    | 0 5 0 |               | 1 |
+
+This will give vector x,
+
+    |  2.6  |
+x = |  0.2  |
+    | 0.625 |
+```
+I plan to print matrix A after sorting and after conversion to CSR to look for any errors that may be present there, and after that proceed with print vector x to see if the LU factorisation works fine or not.
+
+## 04/10/2021
+Set the code to print the row, column and value of matrix A after the sorting. It shows that matrix A is well sorted as it should, and that proves that the function `cusparseDgthr()` works just fine in this approach. Then, I included the `cusparseXcoo2csr()` function to convert the matrix storage format. It printed out a new row array in CSR format, which is expected. The value and column arrays remains unchanged. The last function to be tested is `cusolverSpDcsrlsvluHost()`. I do not have to print matrix A anymore. In this test, I just need to print out vector x. The function requires a matrix descriptor for matrix A, which is done easily. But, there is a conflict on whether to use the host or device version of some parameters. This affects the sequence of the code; the memory copy from device to host part either being before or after the function. I tried using the device parameters, and the same error came out. I shifted the copy memory from device to host part to be above the function, and changed all the parameters used in the function as host parameters. It finally showed some results. It printed the values of vector x, and I have crosschecked it with the reference vector x. The plan for next time is to set a test to compare the timing between GPU and CPU computation time of benchmark matrices and the accuracy of the computed values.
