@@ -20,25 +20,10 @@ in the terminal. It shows real time which is the clock time, and the user time w
 Run the code from before. It works just fine. I just noticed that the matrix used in the example is dense, hence the code revolves around dense matrix operation. Further reading of cuSPARSE is needed to ensure implementation of the solver to sparse matrix to work. Updated this document to markdown format instead of a text file format, as suggested by my supervisor. Fixed something on the previous codes as well. Will need to continue reading cuSPARSE and cuSPARSELt documentations to further understand the implementation on CUDA.
 
 ## 27/09/2021
-I have been reading the documentations for cuSOLVER and cuSPARSE, along with some code examples. I then develop a code to read in the .mtx files. The .mtx file that contains the sparse matrix A can be easily stored in COO storage format. Vector b on the other hand, is stored in a row vector format instead of a column vector. This might change after I know how cuSOLVER deals with a sparse matrix and a vector operation. I found that 
->cusolverSpDcsrlsvlu()
-
-function accepts sparse matrix with CSR storage format. So, I first need to convert matrix A from COO to CSR storage format. The function
->cusparseXcoo2csr()
-
-will do just that. But, it requires the input matrix to be sorted in row order. As of currently, the matrix A is sorted in column order. So, sorting is required before the conversion can take place. The function
->cusparseXcoosortByRow()
-
-will make that happen. I have to check whether all the functions stated requires the parameters to be in host or device memory.
+I have been reading the documentations for cuSOLVER and cuSPARSE, along with some code examples. I then develop a code to read in the .mtx files. The .mtx file that contains the sparse matrix A can be easily stored in COO storage format. Vector b on the other hand, is stored in a row vector format instead of a column vector. This might change after I know how cuSOLVER deals with a sparse matrix and a vector operation. I found that `cusolverSpDcsrlsvlu()` function accepts sparse matrix with CSR storage format. So, I first need to convert matrix A from COO to CSR storage format. The function `cusparseXcoo2csr()` will do just that. But, it requires the input matrix to be sorted in row order. As of currently, the matrix A is sorted in column order. So, sorting is required before the conversion can take place. The function `cusparseXcoosortByRow()` will make that happen. I have to check whether all the functions stated requires the parameters to be in host or device memory.
 
 ## 28/09/2021
-I finished the code from the sorting and conversion part, to the solving part. The code seems fine as there are no errors present in it. Upon compiling, a warning message appear that stated the function 
->cusparseDgthr() 
-
-is deprecated. I have to use 
->cusparseGather() 
-
-instead. Unfortunately, it is not as straightforward as it may seems. The plan for next time is to solve this issue and compile the code to see if it works as it should.
+I finished the code from the sorting and conversion part, to the solving part. The code seems fine as there are no errors present in it. Upon compiling, a warning message appear that stated the function `cusparseDgthr()` is deprecated. I have to use `cusparseGather()` instead. Unfortunately, it is not as straightforward as it may seems. The plan for next time is to solve this issue and compile the code to see if it works as it should.
 
 ## 03/10/2021
 The `cusparseGather()` is a fairly new function and there is not many guides as to how to use them. And it turns out that the code can still be compiled despite the warning message from using `cusparseDgthr()`. First try at running the executable file, an error came out.
