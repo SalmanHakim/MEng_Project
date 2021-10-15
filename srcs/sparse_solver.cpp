@@ -4,8 +4,18 @@
 
 using namespace arma;
 
+void printMatrix(int m, int n, vec x, int ldx, const char *name)
+{
+    for (int row=0; row<m; row++) {
+        for (int col=0; col<n; col++) {
+            double xreg = x(row + (col*ldx));
+            std::cout << name << "(" << row+1 << "," << col+1 << ") = " << xreg << std::endl;
+        }
+    }
+}
+
 //Function to solve the linear equation
-void solve(sp_mat A, vec b) {
+void solve(sp_mat A, vec b, int num_row) {
 
     superlu_opts opts;
 
@@ -19,7 +29,8 @@ void solve(sp_mat A, vec b) {
         std::cout << "no solution" << std::endl;
     }
 
-    std::cout << "x = " << x << std::endl;
+    std::cout << "X = (matlab base-1)" << std::endl;
+    printMatrix(num_row, 1, x , num_row, "x");
 }
 
 int main(int argc, char **argv)
@@ -81,7 +92,7 @@ int main(int argc, char **argv)
     finA.close();
     finb.close();
 
-    solve(A, b);
+    solve(A, b, num_row);
 
 //    sp_mat A = sprandu<sp_mat>(100, 100, 0.1);
 

@@ -8,7 +8,7 @@ in the terminal. The example code was just a simple matrix multiplication. The p
 Tried redoing the example given in the [documentation](http://arma.sourceforge.net/docs.html#spsolve) for sparse matrix solve. Then, I tried including circuit\_1 benchmark matrix from [SuiteSparse Collection](https://sparse.tamu.edu/). In order to implement that, I have to read the .mtx file into variables inside the code. The sparse matrix A has been successfully read with no error. The plan for next time is to try read vector b into the variable.
 
 ## 16/09/2021
-Vector b has been successfully read with no error. Vector x also has been solved and checked with the reference vector of x given. It is roughly the same except for the accuracy. I tried implementing the sparse solver as a function to do the analysis on the timing. Apparently the profiling tool hasn't detected any bottlenecks on the timing. The profiling tool used is gprof. The plan for next time is to try the code with other benchmark matrices.
+Vector b has been successfully read with no error. Vector x also has been solved and checked with the reference vector x given. It is roughly the same except for the accuracy. I tried implementing the sparse solver as a function to do the analysis on the timing. Apparently the profiling tool hasn't detected any bottlenecks on the timing. The profiling tool used is gprof. The plan for next time is to try the code with other benchmark matrices.
 
 ## 20/09/2021
 I can't seem to get the profiling tool the work well with my codes. When implementing the code with circuit\_4 benchmark matrices, the program run significantly slower. I then proceed with using the syntax 
@@ -45,3 +45,15 @@ I plan to print matrix A after sorting and after conversion to CSR to look for a
 
 ## 04/10/2021
 Set the code to print the row, column and value of matrix A after the sorting. It shows that matrix A is well sorted as it should, and that proves that the function `cusparseDgthr()` works just fine in this approach. Then, I included the `cusparseXcoo2csr()` function to convert the matrix storage format. It printed out a new row array in CSR format, which is expected. The value and column arrays remains unchanged. The last function to be tested is `cusolverSpDcsrlsvluHost()`. I do not have to print matrix A anymore. In this test, I just need to print out vector x. The function requires a matrix descriptor for matrix A, which is done easily. But, there is a conflict on whether to use the host or device version of some parameters. This affects the sequence of the code; the memory copy from device to host part either being before or after the function. I tried using the device parameters, and the same error came out. I shifted the copy memory from device to host part to be above the function, and changed all the parameters used in the function as host parameters. It finally showed some results. It printed the values of vector x, and I have crosschecked it with the reference vector x. The plan for next time is to set a test to compare the timing between GPU and CPU computation time of benchmark matrices and the accuracy of the computed values.
+
+## 11/10/2021
+I have been trying to use NVIDIA Nsight Systems to profile the code and see the timing and whether the functions actually running on the DEVICE and not the HOST. But, the same error keep coming up. The
+>Segmentation fault (core dumped)
+
+came up even with the code I previously did an analysis on successfully using the same tool. Have not figured out the reason yet.
+
+## 12/10/2021
+I decided to try the code with more benchmark matrices from the [SuiteSparse Collection](https://sparse.tamu.edu/) to see if it would work. My initial assumption was it will work no problem. But the `Segmentation fault` error came up when running scircuit and hcircuit benchmark matrices. I suspect it has something to do with the memory allocations in HOST. So, I changed the memory allocation of matrix A, vector b and vector x to dynamic using `malloc()` and `calloc()` functions. The error is no longer there, but the program took too long to execute. I have to terminate the program midway because it just won't show anything. The plan for next time is to print out a string that shows the code passes every steps.
+
+## 13/10/2021
+After printing out the status after each steps, I was able to identify the step that was preventing the code from finishing its execution. It was the final step that uses `cusolverSpDcsrlsvluHost()` function. Tried reading the [documentation](https://docs.nvidia.com/cuda/cusolver/index.html#cusolver-lt-t-gt-csrlsvlu) again and decided to try to use one of the reordering schemes, which can significantly affects the performance of the LU solver. After doing a bit of reading, I decided to use the `symamd` which implements Symmetric Approximate Minimum Degree Algorithm based on Quotient Graph. It finally works with bcircuit, hcircuit and scircuit benchmark matrices.

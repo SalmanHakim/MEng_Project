@@ -9,7 +9,7 @@
 #include <cusolverSp.h>
 #include <cusparse.h>
 
-void printMatrix(int m, int n, const double *x, int ldx, const char *name)
+void printMatrix(int m, int n, double *x, int ldx, const char *name)
 {
     for (int row=0; row<m; row++) {
         for (int col=0; col<n; col++) {
@@ -43,11 +43,15 @@ int main(int argc, char** argv)
     finA >> num_row >> num_col >> nnzA;
 
     //Create matrix in COO format
-    double cooValA[nnzA];
-    int cooRowIndA[nnzA];
-    int cooColIndA[nnzA];
+    double *cooValA = (double *)malloc(sizeof(double)*nnzA);
+    int *cooRowIndA = (int *)malloc(sizeof(int)*nnzA);
+    int *cooColIndA = (int *)malloc(sizeof(int)*nnzA);
+    //double cooValA[nnzA];
+    //int cooRowIndA[nnzA];
+    //int cooColIndA[nnzA];
 
-    int csrRowPtrA[num_row+1];
+    int *csrRowPtrA = (int *)calloc(1, sizeof(int)*(num_row+1));
+    //int csrRowPtrA[num_row+1];
 
     //Read the data
     for (int i=0; i<nnzA; i++) {
@@ -71,7 +75,8 @@ int main(int argc, char** argv)
     finb >> num_row >> num_col;
 
     //Create vector b
-    double Vecb[num_row];
+    double *Vecb = (double *)malloc(sizeof(double)*num_row);
+    //double Vecb[num_row];
 
     //Read the data
     for (int j=0; j<num_row; j++) {
@@ -81,10 +86,12 @@ int main(int argc, char** argv)
     }
 
     //Create vector x
-    double Vecx[num_row];
+    double *Vecx = (double *)calloc(1, sizeof(double)*num_row);
+    //double Vecx[num_row];
 
     finA.close();
     finb.close();
+    std::cout << "Data read successfully" << std::endl;
 
     /*int num_row = 3;
     int num_col = 3;
@@ -116,7 +123,7 @@ int main(int argc, char** argv)
     cudaError_t cudaStat7 = cudaSuccess;
     cudaError_t cudaStat8 = cudaSuccess;
 
-    int P[nnzA];
+    //int P[nnzA];
 
     int *d_cooRowIndA           = NULL;
     int *d_cooColIndA           = NULL;
@@ -125,7 +132,7 @@ int main(int argc, char** argv)
     double *d_cooValA           = NULL;
     double *d_cooValA_sorted    = NULL;
     double *d_Vecb              = NULL;
-    double *d_Vecx              = NULL;
+    //double *d_Vecx              = NULL;
     size_t pBufferSizeInBytes   = 0;
     void *pBuffer               = NULL;
 
@@ -136,11 +143,16 @@ int main(int argc, char** argv)
     cusparse_status = cusparseCreate(&cusparseH);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
 
+    cudaStat1 = cudaStreamCreate(&stream);
+    assert(cudaSuccess == cudaStat1);
+
     cusparse_status = cusparseSetStream(cusparseH, stream);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
 
     cusolver_status = cusolverSpSetStream(cusolverH, stream);
     assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
+
+    std::cout << "Handles and stream created successfully" << std::endl;
 
     //step 2 : sort A in row order
     ////allocate buffer
@@ -185,6 +197,8 @@ int main(int argc, char** argv)
     assert( cudaSuccess == cudaStat4 );
     assert( cudaSuccess == cudaStat5 );
 
+    std::cout << "Data copied from HOST to DEVICE successfully" << std::endl;
+
     ////set value P
     cusparse_status = cusparseCreateIdentityPermutation(cusparseH, nnzA, d_P);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
@@ -213,6 +227,8 @@ int main(int argc, char** argv)
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
     assert(cudaSuccess == cudaStat1);
 
+    std::cout << "Matrix A sorted successfully" << std::endl;
+
     //step 3 : change format of A from COO to CSR
     cusparse_status = cusparseXcoo2csr(
                                     cusparseH,
@@ -222,6 +238,8 @@ int main(int argc, char** argv)
                                     d_csrRowPtrA,
                                     CUSPARSE_INDEX_BASE_ZERO);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
+
+    std::cout << "Storage format converted successfully" << std::endl;
 
     //step 4 : copy parameters from device to host
     cusparseMatDescr_t MatADescr;
@@ -233,12 +251,12 @@ int main(int argc, char** argv)
     //cudaStat1 = cudaMalloc(&d_Vecx, sizeof(double)*num_row);
     //assert(cudaSuccess == cudaStat1);
 
-    cudaStat1 = cudaDeviceSynchronize(); /* wait until the computation is done */
+    cudaStat1 = cudaDeviceSynchronize();  //wait until the computation is done
     //cudaStat2 = cudaMemcpy(Vecx, d_Vecx, sizeof(double)*num_row, cudaMemcpyDeviceToHost);
     cudaStat3 = cudaMemcpy(cooRowIndA, d_cooRowIndA, sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
     cudaStat4 = cudaMemcpy(cooColIndA, d_cooColIndA, sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
     cudaStat5 = cudaMemcpy(csrRowPtrA, d_csrRowPtrA, sizeof(int)*(num_row+1)   , cudaMemcpyDeviceToHost);
-    cudaStat6 = cudaMemcpy(P,       d_P      , sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
+    //cudaStat6 = cudaMemcpy(P,       d_P      , sizeof(int)*nnzA   , cudaMemcpyDeviceToHost);
     cudaStat7 = cudaMemcpy(cooValA, d_cooValA_sorted, sizeof(double)*nnzA, cudaMemcpyDeviceToHost);
     cudaStat8 = cudaDeviceSynchronize();
     assert( cudaSuccess == cudaStat1 );
@@ -249,6 +267,8 @@ int main(int argc, char** argv)
     assert( cudaSuccess == cudaStat6 );
     assert( cudaSuccess == cudaStat7 );
     assert( cudaSuccess == cudaStat8 );
+
+    std::cout << "Data copied from DEVICE to HOST successfully" << std::endl;
 
     //step 5 : LU factorisation and solving for x
     double tol  = 1.e-7;
@@ -264,12 +284,14 @@ int main(int argc, char** argv)
                                         cooColIndA,
                                         Vecb,
                                         tol,
-                                        0,
+                                        2,
                                         Vecx,
                                         &sing);
     cudaStat1 = cudaDeviceSynchronize();
     assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
     assert(cudaSuccess == cudaStat1);
+
+    std::cout << "Vector X is solved successfully" << std::endl;
 
 
     /*printf("sorted csr: \n");
@@ -307,7 +329,7 @@ int main(int argc, char** argv)
     if (d_P)                cudaFree(d_P);
     if (pBuffer)            cudaFree(pBuffer);
     if (d_Vecb)             cudaFree(d_Vecb);
-    if (d_Vecx)             cudaFree(d_Vecx);
+    //if (d_Vecx)             cudaFree(d_Vecx);
 
     if (cusolverH)          cusolverSpDestroy(cusolverH);
     if (cusparseH)          cusparseDestroy(cusparseH);
@@ -316,7 +338,12 @@ int main(int argc, char** argv)
 
     cudaDeviceReset();
 
-    //free(Vecx);
+    free(cooValA);
+    free(cooColIndA);
+    free(cooRowIndA);
+    free(csrRowPtrA);
+    free(Vecb);
+    free(Vecx);
 
     return 0;
 }
