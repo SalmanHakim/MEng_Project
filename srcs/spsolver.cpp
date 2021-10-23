@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
+#include <chrono>
 
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
@@ -107,7 +108,9 @@ int main(int argc, char** argv)
     double Vecx[num_row];*/
     
     //////////////////////////////////////////////////////////////////////////////////////////
-    
+    //Start measuring time
+    auto begin = std::chrono::high_resolution_clock::now();
+
     cusolverSpHandle_t  cusolverH = NULL;
     cusparseHandle_t    cusparseH = NULL;
     cudaStream_t stream = NULL;
@@ -152,7 +155,7 @@ int main(int argc, char** argv)
     cusolver_status = cusolverSpSetStream(cusolverH, stream);
     assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
 
-    std::cout << "Handles and stream created successfully" << std::endl;
+    //std::cout << "Handles and stream created successfully" << std::endl;
 
     //step 2 : sort A in row order
     ////allocate buffer
@@ -197,7 +200,7 @@ int main(int argc, char** argv)
     assert( cudaSuccess == cudaStat4 );
     assert( cudaSuccess == cudaStat5 );
 
-    std::cout << "Data copied from HOST to DEVICE successfully" << std::endl;
+    //std::cout << "Data copied from HOST to DEVICE successfully" << std::endl;
 
     ////set value P
     cusparse_status = cusparseCreateIdentityPermutation(cusparseH, nnzA, d_P);
@@ -227,7 +230,7 @@ int main(int argc, char** argv)
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
     assert(cudaSuccess == cudaStat1);
 
-    std::cout << "Matrix A sorted successfully" << std::endl;
+    //std::cout << "Matrix A sorted successfully" << std::endl;
 
     //step 3 : change format of A from COO to CSR
     cusparse_status = cusparseXcoo2csr(
@@ -239,7 +242,7 @@ int main(int argc, char** argv)
                                     CUSPARSE_INDEX_BASE_ZERO);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
 
-    std::cout << "Storage format converted successfully" << std::endl;
+    //std::cout << "Storage format converted successfully" << std::endl;
 
     //step 4 : copy parameters from device to host
     cusparseMatDescr_t MatADescr;
@@ -248,8 +251,29 @@ int main(int argc, char** argv)
     cusparse_status = cusparseSetMatDiagType(MatADescr, CUSPARSE_DIAG_TYPE_NON_UNIT);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
     
-    //cudaStat1 = cudaMalloc(&d_Vecx, sizeof(double)*num_row);
-    //assert(cudaSuccess == cudaStat1);
+    /*cudaStat1 = cudaMalloc(&d_Vecx, sizeof(double)*num_row);
+    assert(cudaSuccess == cudaStat1);
+
+    double tol  = 1.e-7;
+    int sing   = 0;
+
+    cusolver_status = cusolverSpDcsrlsvqr(
+                                        cusolverH,
+                                        num_row,
+                                        nnzA,
+                                        MatADescr,
+                                        d_cooValA_sorted,
+                                        d_csrRowPtrA,
+                                        d_cooColIndA,
+                                        d_Vecb,
+                                        tol,
+                                        2,
+                                        d_Vecx,
+                                        &sing);
+
+    assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
+
+    auto end        = std::chrono::high_resolution_clock::now();*/
 
     cudaStat1 = cudaDeviceSynchronize();  //wait until the computation is done
     //cudaStat2 = cudaMemcpy(Vecx, d_Vecx, sizeof(double)*num_row, cudaMemcpyDeviceToHost);
@@ -268,7 +292,7 @@ int main(int argc, char** argv)
     assert( cudaSuccess == cudaStat7 );
     assert( cudaSuccess == cudaStat8 );
 
-    std::cout << "Data copied from DEVICE to HOST successfully" << std::endl;
+    //std::cout << "Data copied from DEVICE to HOST successfully" << std::endl;
 
     //step 5 : LU factorisation and solving for x
     double tol  = 1.e-7;
@@ -291,8 +315,14 @@ int main(int argc, char** argv)
     assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
     assert(cudaSuccess == cudaStat1);
 
-    std::cout << "Vector X is solved successfully" << std::endl;
+    //Stop measuring time and calculate elapsed time
+    auto end        = std::chrono::high_resolution_clock::now();
+    auto elapsed    = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
 
+    std::cout << "Vector X is solved successfully" << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "Time measured (seconds) : " << elapsed.count() * 1e-9 << std::endl;
 
     /*printf("sorted csr: \n");
     printf("Row = {");
@@ -317,8 +347,8 @@ int main(int argc, char** argv)
         printf("P[%d] = %d \n", j, P[j] );
     };*/
 
-    std::cout << "X = (matlab base-1)" << std::endl;
-    printMatrix(num_row, 1, Vecx, num_row, "x");
+    //std::cout << "X = (matlab base-1)" << std::endl;
+    //printMatrix(num_row, 1, Vecx, num_row, "x");
 
     //Free resources
     if (d_cooColIndA)       cudaFree(d_cooColIndA);

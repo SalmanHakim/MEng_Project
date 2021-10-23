@@ -1,6 +1,6 @@
 #include <iostream>
 #include <armadillo>
-#include <time.h>
+#include <chrono>
 
 using namespace arma;
 
@@ -15,7 +15,7 @@ void printMatrix(int m, int n, vec x, int ldx, const char *name)
 }
 
 //Function to solve the linear equation
-void solve(sp_mat A, vec b, int num_row) {
+vec solve(sp_mat A, vec b, int num_row) {
 
     superlu_opts opts;
 
@@ -29,8 +29,7 @@ void solve(sp_mat A, vec b, int num_row) {
         std::cout << "no solution" << std::endl;
     }
 
-    std::cout << "X = (matlab base-1)" << std::endl;
-    printMatrix(num_row, 1, x , num_row, "x");
+    return x;
 }
 
 int main(int argc, char **argv)
@@ -92,7 +91,15 @@ int main(int argc, char **argv)
     finA.close();
     finb.close();
 
-    solve(A, b, num_row);
+    auto begin = std::chrono::high_resolution_clock::now();
+    vec x = solve(A, b, num_row);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+
+    //std::cout << "X = (matlab base-1)" << std::endl;
+    //printMatrix(num_row, 1, x , num_row, "x");
+
+    std::cout << "Time measured (seconds) : " << elapsed.count() * 1e-9 << std::endl;
 
 //    sp_mat A = sprandu<sp_mat>(100, 100, 0.1);
 
