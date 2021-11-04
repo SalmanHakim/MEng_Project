@@ -86,3 +86,17 @@ I finally figured out the CLI profiling using Nsight Systems. The problem is the
 >$nsys profile --trace=cuda,osrt --sample=cpu -o \<filename\> --stats=true ./\<nameofprogram\>
 
 This will create a qdrep file with the name \<filename\> in the working directory. With `--stats=true`, it will generate a summary of the analysis inside the terminal. The analysis gave a timing of each functions called by the code. I did not see anything from the analysis that says a cusolver function is used, indicating that the `cusolverSpDcsrlsvluHost()` function is done on HOST. Will reconfirm this later with more information from the analysis.
+
+## 03/11/2021
+
+I ran the benchmark matrices on two codes--sparse_solver.cpp and spsolver.cpp--that contains Armadillo library and CUDA library. The speedup is calculated by dividing the execution time on CUDA with the execution time on Armadillo. The Armadillo function that I use is the `spsolve()`, while the CUDA function is the `cusolverSpDcsrlsvluHost()`.
+
+| Benchmark | Dimension, n | Non-zero elements, nnz | Execution time / s (Armadillo) | Execution time / s (CUDA) | Speedup |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| add20 | 2395 | 17319 | 0.01059 | 0.60033 | 0.01764x |
+| add32 | 4960 | 23884 | 0.00839 | 0l60959 | 0.01376x |
+| circuit_1 | 2624 | 35823 | 0.13950 | 0.65754 | 0.21216x |
+| circuit_4 | 80209 | 307604 | 56.29252 | 5.05437 | 11.13739x |
+| bcircuit | 68902 | 375558 |0.20016 | 4.30923 | 0.04645x |
+| hcircuit | 105676 | 513072 | 0.72707 | 8.54220 | 0.08511x |
+| scircuit | 170998 | 958936 | 0.94049 | 22.33581 | 0.04211x |
