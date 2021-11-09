@@ -177,8 +177,7 @@ int main(int argc, char** argv)
     cudaStat5 = cudaMalloc(&d_cooValA_sorted, sizeof(double)*nnzA);
     cudaStat6 = cudaMalloc(&pBuffer         , sizeof(char)*pBufferSizeInBytes);
     cudaStat7 = cudaMalloc(&d_csrRowPtrA    , sizeof(int)*(num_row+1));
-    cudaStat8 = cudaMalloc(&d_Vecb          , sizeof(double)*num_row);
-    
+    cudaStat8 = cudaMalloc(&d_Vecb          , sizeof(double)*num_row); 
 
     assert( cudaSuccess == cudaStat1 );
     assert( cudaSuccess == cudaStat2 );

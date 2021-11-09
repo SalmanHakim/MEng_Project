@@ -100,3 +100,12 @@ I ran the benchmark matrices on two codes--sparse_solver.cpp and spsolver.cpp--t
 | bcircuit | 68902 | 375558 |0.20016 | 4.30923 | 0.04645x |
 | hcircuit | 105676 | 513072 | 0.72707 | 8.54220 | 0.08511x |
 | scircuit | 170998 | 958936 | 0.94049 | 22.33581 | 0.04211x |
+
+## 09/11/2021
+
+From the table above, it can be observed that only with `circuit_4` does GPU shows an improvement over CPU. I went and checked the sparsity pattern of matrix A of each benchmarks.
+
+![add20](/sparsity/add20.png)
+![add32](/sparsity/add32.png)
+![circuit\_1](/sparsity/circuit_1.png)
+![circuit\_4](/sparsity/circuit_4.png)
