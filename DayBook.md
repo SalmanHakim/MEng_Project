@@ -103,9 +103,13 @@ I ran the benchmark matrices on two codes--sparse_solver.cpp and spsolver.cpp--t
 
 ## 09/11/2021
 
-From the table above, it can be observed that only with `circuit_4` does GPU shows an improvement over CPU. I went and checked the sparsity pattern of matrix A of each benchmarks.
+From the table above, it can be observed that only with `circuit_4` does GPU shows an improvement over CPU. I went and checked the sparsity pattern of matrix A of each benchmarks using MATLAB.
 
 ![add20](/sparsity/add20.png)
 ![add32](/sparsity/add32.png)
 ![circuit\_1](/sparsity/circuit_1.png)
 ![circuit\_4](/sparsity/circuit_4.png)
+![hcircuit](/sparsity/hcircuit.png)
+![scircuit](/sparsity/scircuit.png)
+
+From the figures above, the only significant difference that `circuit_4` has compared to the others is its non-zero elements are concentrated on the diagonal, bottom, right-hand side of the matrix, while the others are a bit more spread out.
