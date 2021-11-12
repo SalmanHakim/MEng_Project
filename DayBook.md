@@ -94,7 +94,7 @@ I ran the benchmark matrices on two codes--sparse_solver.cpp and spsolver.cpp--t
 | Benchmark | Dimension, n | Non-zero elements, nnz | Execution time / s (Armadillo) | Execution time / s (CUDA) | Speedup |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | add20 | 2395 | 17319 | 0.01059 | 0.60033 | 0.01764x |
-| add32 | 4960 | 23884 | 0.00839 | 0l60959 | 0.01376x |
+| add32 | 4960 | 23884 | 0.00839 | 0.60959 | 0.01376x |
 | circuit_1 | 2624 | 35823 | 0.13950 | 0.65754 | 0.21216x |
 | circuit_4 | 80209 | 307604 | 56.29252 | 5.05437 | 11.13739x |
 | bcircuit | 68902 | 375558 |0.20016 | 4.30923 | 0.04645x |
@@ -113,3 +113,15 @@ From the table above, it can be observed that only with `circuit_4` does GPU sho
 ![scircuit](/sparsity/scircuit.png)
 
 From the figures above, the only significant difference that `circuit_4` has compared to the others is its non-zero elements are concentrated on the diagonal, bottom, right-hand side of the matrix, while the others are a bit more spread out.
+
+## 12/11/2021
+
+I tried using the routines in cuSPARSE library. It has a sparse matrix-vector solver which will give a solution for x in Ax=b equation. The LU factorisation prior to that has to be done manually. The benefit of using this routine compared to `cusolverSpDcsrlsvluHost()` is it is done in the DEVICE instead of HOST. After writing the code, I tried running the circuit\_1 benchmark but I have to terminate the program before it finishes because it took a long time. It happens to circuit\_4, hcircuit and scircuit as well. The only benchmark matrices that managed to finish are add20, add32 and bcircuit. The results are shown below.
+
+| Benchmark | Executuion time / s (Armadillo) | Execution time / s (cusolver) | Execution time / s (cusparse) |
+| :--- | :---: | :---: | :---: |
+| add20 | 0.01059 | 0.60033 | 0.21831 |
+| add32 | 0.00839 | 0.60959 | 0.21339 |
+| bcircuit | 0.20016 | 4.30923 | 0.23815 |
+
+From the results, it can be observed that the cusparse routine showed significant improvement over cusolver. The reason for the cusparse routine not working with the other benchmark matrices is still unknown. They all have one thing in common, which is the function `cusparseXcsrilu02_zeroPivot()` during the analysis gave out an error. Might have to check out what does this function really do and how can I avoid this problem.
