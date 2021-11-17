@@ -125,3 +125,15 @@ I tried using the routines in cuSPARSE library. It has a sparse matrix-vector so
 | bcircuit | 0.20016 | 4.30923 | 0.23815 |
 
 From the results, it can be observed that the cusparse routine showed significant improvement over cusolver. The reason for the cusparse routine not working with the other benchmark matrices is still unknown. They all have one thing in common, which is the function `cusparseXcsrilu02_zeroPivot()` during the analysis gave out an error. Might have to check out what does this function really do and how can I avoid this problem.
+
+## 16/11/2021
+
+After further read into incomplete LU factorisation (ILU), it is an iterative method and it is an approximation of LU factorisation so it does not return the exact solution for x in Ax=b. ILU is often use as a preconditioner for another iterative method such as Bi-Conjugate Gradient Stabilised (BiCGStab). So, even though it is fast, the ILU is far from accurate. The figures below show the solutions to `add32` benchmark matrix using ILU (cusparse) and LU (cusolver).
+
+LU:
+![LU](/sparsity/LU.png)
+
+ILU:
+![ILU](/sparsity/ILU.png)
+
+Due to the solution being so small, the ILU assumes it to be 0. This happened to `add20` and `bcircuit` as well. This shows that the ILU iterative method is not suitable to be used to find the final solution of Ax=b, and is not acceptable in simulation.
