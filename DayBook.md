@@ -137,3 +137,41 @@ ILU:
 ![ILU](/sparsity/ILU.png)
 
 Due to the solution being so small, the ILU assumes it to be 0. This happened to `add20` and `bcircuit` as well. This shows that the ILU iterative method is not suitable to be used to find the final solution of Ax=b, and is not acceptable in simulation.
+
+## 25/11/2021
+
+I have been running more benchmark matrices to see if there is any more cases where CUDA's `cusolverSpDcsrlsvluHost()` outperforms Armadillo's `spsolve()`. The results are in the table below.
+
+| Benchmark | Dimension, n | Non-zero elements, nnz | Percentage density | Execution time / s (Armadillo) | Execution time / s (CUDA) | Speedup |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| G2_circuit | 150,102 | 438,388 | 0.00195% | 0.74287 | 11.60658 | 0.06400 |
+| G3_circuit | 1,585,478 | 4,623,152 | 0.00018% | 21.65932 | \>600(10mins) | \<0.03610 |
+| Freescale1 | 3,428,755 | 18,920,347 | 0.00016% | 26.37856 | \>600(10mins) | \<0.04396 |
+| onetone1 | 36,057 | 341,088 | 0.02624% | 1.41071 | 32.17020 | 0.04385 |
+| onetone2 | 36,057 | 227,628 | 0.01751% | 0.19581 | 8.11955 | 0.02412 |
+| twotone | 120,750 | 1,224,224 | 0.00840% | 8.55270 | \>600(10mins) | \<0.01425 |
+| Raj1 | 263,743 | 1,302,464 | 0.00187% | \>600(10mins) | 51.97386 | \>11.54426 |
+| rajat03 | 7,602 | 32,653 | 0.05650% | 0.03249 | 0.70440 | 0.04612 |
+| rajat15 | 37,261 | 443,573 | 0.03195% | 7.09579 | 1.53673 | 4.61745 |
+| rajat18 | 94,294 | 485,143 | 0.00546% | \>600(10mins) | 7.68681 | \>78.05579 |
+| coupled | 11,341 | 98,523 | 0.07660% | 3.58875 | 0.81063 | 4.42709 |
+| transient | 178,866 | 961,790 | 0.00301% | \>600(10mins) | 28.65658 | \>20.93760 |
+| ASIC_100k | 99,340 | 954,163 | 0.00967% | 157.41400 | 19.15660 | 8.21722 |
+| ASIC_100ks | 99,190 | 578,890 | 0.00588% | 116.72320 | 10.53328 | 11.08137 |
+| ASIC_320k | 321,821 | 2,635,364 | 0.00254% | \>1200(20mins) | 135.08360 | \>8.88339 |
+| ASIC_320ks | 321,671 | 1,827,807 | 0.00177% | 39.07246 | 123.92560 | 0.31529 |
+
+From the result, we can observe that there are some matrices that shows the same behaviour as `circuit_4` when running the tests. I got the sparsity pattern of said matrices to compare with `circuit_4`.
+
+![circuit\_4](/sparsity/circuit_4.png)
+![Raj1](/sparsity/Raj1.png)
+![rajat15](/sparsity/rajat15.png)
+![rajat18](/sparsity/rajat18.png)
+![coupled](/sparsity/coupled.png)
+![transient](/sparsity/transient.png)
+![ASIC\_100k](/sparsity/ASIC_100k.png)
+![ASIC\_100ks](/sparsity/ASIC_100ks.png)
+![ASIC\_320k](/sparsity/ASIC_320k.png)
+![ASIC\_320ks](/sparsity/ASIC_320ks.png)
+
+The sparsity pattern for the other matrices can be found in [sparsity](/sparsity) folder. The relationship between those pattern have not been concluded yet.

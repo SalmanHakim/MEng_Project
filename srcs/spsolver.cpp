@@ -109,6 +109,7 @@ int main(int argc, char** argv)
     
     //////////////////////////////////////////////////////////////////////////////////////////
     //Start measuring time
+    std::cout << "START" << std::endl;
     auto begin = std::chrono::high_resolution_clock::now();
 
     cusolverSpHandle_t  cusolverH = NULL;
@@ -247,7 +248,9 @@ int main(int argc, char** argv)
     cusparseMatDescr_t MatADescr;
     cusparse_status = cusparseCreateMatDescr(&MatADescr);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
-    cusparse_status = cusparseSetMatDiagType(MatADescr, CUSPARSE_DIAG_TYPE_NON_UNIT);
+    cusparse_status = cusparseSetMatIndexBase(MatADescr, CUSPARSE_INDEX_BASE_ZERO);
+    assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
+    cusparse_status = cusparseSetMatType(MatADescr, CUSPARSE_MATRIX_TYPE_GENERAL);
     assert(CUSPARSE_STATUS_SUCCESS == cusparse_status);
     
     /*cudaStat1 = cudaMalloc(&d_Vecx, sizeof(double)*num_row);
@@ -346,8 +349,8 @@ int main(int argc, char** argv)
         printf("P[%d] = %d \n", j, P[j] );
     };*/
 
-    //std::cout << "X = (matlab base-1)" << std::endl;
-    //printMatrix(num_row, 1, Vecx, num_row, "x");
+    /*std::cout << "X = (matlab base-1)" << std::endl;
+    printMatrix(num_row, 1, Vecx, num_row, "x");*/
 
     //Free resources
     if (d_cooColIndA)       cudaFree(d_cooColIndA);
