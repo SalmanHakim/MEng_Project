@@ -105,12 +105,12 @@ I ran the benchmark matrices on two codes--sparse_solver.cpp and spsolver.cpp--t
 
 From the table above, it can be observed that only with `circuit_4` does GPU shows an improvement over CPU. I went and checked the sparsity pattern of matrix A of each benchmarks using MATLAB.
 
-![add20](/sparsity/add20.png)
-![add32](/sparsity/add32.png)
+![add20](/sparsity/slowdown/add20.png)
+![add32](/sparsity/slowdown/add32.png)
 ![circuit\_1](/sparsity/circuit_1.png)
-![circuit\_4](/sparsity/circuit_4.png)
-![hcircuit](/sparsity/hcircuit.png)
-![scircuit](/sparsity/scircuit.png)
+![circuit\_4](/sparsity/speedup/circuit_4.png)
+![hcircuit](/sparsity/slowdown/hcircuit.png)
+![scircuit](/sparsity/slowdown/scircuit.png)
 
 From the figures above, the only significant difference that `circuit_4` has compared to the others is its non-zero elements are concentrated on the diagonal, bottom, right-hand side of the matrix, while the others are a bit more spread out.
 
@@ -164,14 +164,14 @@ I have been running more benchmark matrices to see if there is any more cases wh
 From the result, we can observe that there are some matrices that shows the same behaviour as `circuit_4` when running the tests. I got the sparsity pattern of said matrices to compare with `circuit_4`.
 
 ![circuit\_4](/sparsity/circuit_4.png)
-![Raj1](/sparsity/Raj1.png)
+![Raj1](/sparsity/speedup/Raj1.png)
 ![rajat15](/sparsity/rajat15.png)
-![rajat18](/sparsity/rajat18.png)
+![rajat18](/sparsity/speedup/rajat18.png)
 ![coupled](/sparsity/coupled.png)
-![transient](/sparsity/transient.png)
-![ASIC\_100k](/sparsity/ASIC_100k.png)
-![ASIC\_100ks](/sparsity/ASIC_100ks.png)
-![ASIC\_320k](/sparsity/ASIC_320k.png)
+![transient](/sparsity/speedup/transient.png)
+![ASIC\_100k](/sparsity/speedup/ASIC_100k.png)
+![ASIC\_100ks](/sparsity/speedup/ASIC_100ks.png)
+![ASIC\_320k](/sparsity/speedup/ASIC_320k.png)
 ![ASIC\_320ks](/sparsity/ASIC_320ks.png)
 
 The sparsity pattern for the other matrices can be found in [sparsity](/sparsity) folder. The relationship between those pattern have not been concluded yet.
