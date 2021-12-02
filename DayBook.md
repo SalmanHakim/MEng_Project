@@ -175,3 +175,9 @@ From the result, we can observe that there are some matrices that shows the same
 ![ASIC\_320ks](/sparsity/ASIC_320ks.png)
 
 The sparsity pattern for the other matrices can be found in [sparsity](/sparsity) folder. The relationship between those pattern have not been concluded yet.
+
+## 30/11/2021
+
+I tested more benchmark matrices to group them into two groups; speedup and slowdown. To be included in the `speedup` group, the `CUDA` code must be >5x faster than `Armadillo` code, and vice versa for the `slowdown` group. Inside the `sparsity` folder, I have separated all the tested matrices that met the criteria into 2 groups. All the matrices left ungrouped are either untested or do not meet the criteria.
+
+I also include a new .md file called `make.md`. It contains a guide on how to compile the code that I have been working on.
