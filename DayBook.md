@@ -163,7 +163,7 @@ I have been running more benchmark matrices to see if there is any more cases wh
 
 From the result, we can observe that there are some matrices that shows the same behaviour as `circuit_4` when running the tests. I got the sparsity pattern of said matrices to compare with `circuit_4`.
 
-![circuit\_4](/sparsity/circuit_4.png)
+![circuit\_4](/sparsity/speedup/circuit_4.png)
 ![Raj1](/sparsity/speedup/Raj1.png)
 ![rajat15](/sparsity/rajat15.png)
 ![rajat18](/sparsity/speedup/rajat18.png)
