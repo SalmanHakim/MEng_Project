@@ -181,3 +181,9 @@ The sparsity pattern for the other matrices can be found in [sparsity](/sparsity
 I tested more benchmark matrices to group them into two groups; speedup and slowdown. To be included in the `speedup` group, the `CUDA` code must be >5x faster than `Armadillo` code, and vice versa for the `slowdown` group. Inside the `sparsity` folder, I have separated all the tested matrices that met the criteria into 2 groups. All the matrices left ungrouped are either untested or do not meet the criteria.
 
 I also include a new .md file called `make.md`. It contains a guide on how to compile the code that I have been working on.
+
+## 06/12/2021
+
+I tested 9 benchmark matrices that have a dimension larger than 1M, and none of it can be solved under 10 mins for CUDA functions. Most of them managed to finish with Armadillo functions, and some took too long to finish, and one matrix ran into an error. Initial assumption is none of the large matrices will experience a speedup with CUDA over Armadillo.
+
+Next plan is to breakdown the timing for CUDA to see how much time each process take and how it scales with size or nonzero elements of the matrices.
