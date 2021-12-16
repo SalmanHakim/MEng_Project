@@ -187,3 +187,18 @@ I also include a new .md file called `make.md`. It contains a guide on how to co
 I tested 9 benchmark matrices that have a dimension larger than 1M, and none of it can be solved under 10 mins for CUDA functions. Most of them managed to finish with Armadillo functions, and some took too long to finish, and one matrix ran into an error. Initial assumption is none of the large matrices will experience a speedup with CUDA over Armadillo.
 
 Next plan is to breakdown the timing for CUDA to see how much time each process take and how it scales with size or nonzero elements of the matrices.
+
+## 10/12/2021
+
+I included the Microsoft Excel file that contains all the results to the tests that I ran with the benchmarks. As for `cusolverSpDcsrlvluHost()` function by CUDA, the timing is roughly proportional to the number of nonzero elements of the matrix. The timing for `spsolve()` function by Armadillo is quite random. I cannot see a pattern at all. I might be wrong, but these will be better illustrated in graphs that will be uploaded soon.
+
+## 14/12/2021
+
+I made 2 sets of plots. One is elapsed time of both Armadillo and CUDA functions, against matrix dimension, n. Another one is the elapsed time as well, against nonzero elements of the matrix, nnz.
+
+![timeVSn](/results/timeVSn.png)
+![timeVSnnz](/results/timeVSnnz.png)
+
+As we can observe from the figures above, there is an obvious trend for CUDA, where as the dimension and number of nonzero elements increases, the time taken to solve it also increases. While for Armadillo, I cannot recognise any obvious trend. This will be further looked into.
+
+The plan for next time is to briefly look into `cusolverRf` group of functions to run multiple factorisation one after the other quickly or possibly run them simultaneously.
