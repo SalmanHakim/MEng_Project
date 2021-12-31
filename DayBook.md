@@ -202,3 +202,7 @@ I made 2 sets of plots. One is elapsed time of both Armadillo and CUDA functions
 As we can observe from the figures above, there is an obvious trend for CUDA, where as the dimension and number of nonzero elements increases, the time taken to solve it also increases. While for Armadillo, I cannot recognise any obvious trend. This will be further looked into.
 
 The plan for next time is to briefly look into `cusolverRf` group of functions to run multiple factorisation one after the other quickly or possibly run them simultaneously.
+
+## 17/12/2021
+
+I have read the `cusolverRf` documentations and a possible speedup seems to be achieveable meaning that the test will equate to Monte Carlo tests in of a real life circuits. There are two ways of using `cusolverRf`; batch and in-memory. Initial guess is that I will need to use the in-memory method. But there might be more speedup if batch is used based on someone who has tested both and found out that batch is faster than in-memory. I will need to try it myself to see if that is the case for my tests and benchmarks.
