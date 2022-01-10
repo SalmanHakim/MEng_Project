@@ -206,3 +206,15 @@ The plan for next time is to briefly look into `cusolverRf` group of functions t
 ## 17/12/2021
 
 I have read the `cusolverRf` documentations and a possible speedup seems to be achieveable meaning that the test will equate to Monte Carlo tests in of a real life circuits. There are two ways of using `cusolverRf`; batch and in-memory. Initial guess is that I will need to use the in-memory method. But there might be more speedup if batch is used based on someone who has tested both and found out that batch is faster than in-memory. I will need to try it myself to see if that is the case for my tests and benchmarks.
+
+## 22/12/2021
+
+I have finished the code that utilised `cusolverRf` functions, compiled it, but not able to run it due to an error when copying data from device to host. I would want to look into it more but I have to leave this for later and proceed to writing my report. But it would be interesting to find out if there would be any speedups, and if there are, it will be useful for Monte Carlo simulations.
+
+## 10/01/2021
+
+I have included the results of vector x for a few bencmarks, derived from CUDA, Armadillo and Matlab. I am planning to use the result from Matlab as the reference. This is to check the accuracy of the calculations despite their speed. All the results are inside the `srcs` folder.
+
+There are 2 benchmarks, `circuit_1` and `circuit_4`, that come with its own vector x file, so for those two the comparison will be made with the said file, not the one derived from Matlab.
+
+I used the vector x file that came with `circuit_1` and `circuit_4` to compare with the results derived from Matlab. With that, I am confident that the result from Matlab is close to the real result.
